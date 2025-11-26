@@ -8,6 +8,7 @@ export interface User {
   id: string;
   name: string;
   email: string;
+  avatar?: string;
   createdAt: string;
 }
 
@@ -250,6 +251,14 @@ export const userAPI = {
     if (USE_MOCK_API) return mockAPI.getDashboard();
 
     const response = await api.get('/user/dashboard');
+    return {
+      success: true,
+      data: response.data
+    };
+  },
+
+  updateProfile: async (name: string, avatar?: string): Promise<ApiResponse<User>> => {
+    const response = await api.put('/user/profile', { name, avatar });
     return {
       success: true,
       data: response.data

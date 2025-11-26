@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { moodAPI, MoodLog } from '../utils/api';
-import { mockMoodLogs } from '../utils/mockApi';
 
 interface TrendsScreenProps {
   onBack?: () => void;
@@ -11,11 +10,26 @@ export function TrendsScreen({ onBack }: TrendsScreenProps) {
   const [activeTab, setActiveTab] = useState<'mood' | 'consistency' | 'summary'>('mood');
   const [moodLogs, setMoodLogs] = useState<MoodLog[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    // Use mock data for testing
-    setMoodLogs(mockMoodLogs);
-    setLoading(false);
+    const loadMoodLogs = async () => {
+      try {
+        const response = await moodAPI.getLogs();
+        if (response.success && response.data) {
+          setMoodLogs(response.data);
+        } else {
+          setError(response.message || 'Failed to load mood logs');
+        }
+      } catch (err: any) {
+        console.error('Error loading mood logs:', err);
+        setError(err.message || 'Unable to load mood logs');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadMoodLogs();
   }, []);
 
   // Helper function to parse date string (YYYY-MM-DD) to Date object
@@ -178,6 +192,10 @@ export function TrendsScreen({ onBack }: TrendsScreenProps) {
         {loading ? (
           <div className="flex items-center justify-center h-full">
             <div className="text-gray-500">Loading trends data...</div>
+          </div>
+        ) : error ? (
+          <div className="flex items-center justify-center h-full text-center px-6">
+            <div className="text-gray-500">Unable to load mood trends right now: {error}</div>
           </div>
         ) : activeTab === 'mood' && (
           <div className="bg-white rounded-3xl p-6 shadow-lg">

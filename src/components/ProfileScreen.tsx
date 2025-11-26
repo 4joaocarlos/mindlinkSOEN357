@@ -4,15 +4,14 @@ import { User as UserType } from './LoginScreen';
 
 interface ProfileScreenProps {
   user: UserType | null;
-  darkMode: boolean;
-  onToggleDarkMode: () => void;
   onLogout: () => void;
   totalLogs: number;
   streakCount: number;
   badgeCount: number;
+  onEditProfile: () => void;
 }
 
-export function ProfileScreen({ user, darkMode, onToggleDarkMode, onLogout, totalLogs, streakCount, badgeCount }: ProfileScreenProps) {
+export function ProfileScreen({ user, onLogout, totalLogs, streakCount, badgeCount, onEditProfile }: ProfileScreenProps) {
   const [notificationsEnabled, setNotificationsEnabled] = React.useState(true);
 
   const formatDate = (dateString: string) => {
@@ -34,8 +33,8 @@ export function ProfileScreen({ user, darkMode, onToggleDarkMode, onLogout, tota
         {/* Profile Card */}
         <div className="bg-white rounded-3xl p-6 mb-6 shadow-lg">
           <div className="flex items-center gap-4 mb-4">
-            <div className="w-20 h-20 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full flex items-center justify-center">
-              <User className="w-10 h-10 text-white" />
+            <div className="w-20 h-20 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full flex items-center justify-center text-4xl">
+              {user?.avatar ? user.avatar : <User className="w-10 h-10 text-white" />}
             </div>
             <div>
               <h2 className="text-gray-800 mb-1">
@@ -46,7 +45,10 @@ export function ProfileScreen({ user, darkMode, onToggleDarkMode, onLogout, tota
               </p>
             </div>
           </div>
-          <button className="w-full bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 py-3 rounded-2xl hover:shadow-md transition-shadow">
+          <button
+            onClick={onEditProfile}
+            className="w-full bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 py-3 rounded-2xl hover:shadow-md transition-shadow"
+          >
             Edit Profile
           </button>
         </div>
@@ -100,50 +102,40 @@ export function ProfileScreen({ user, darkMode, onToggleDarkMode, onLogout, tota
             </button>
           </div>
 
-          {/* Theme */}
-          <div className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-2xl transition-colors">
-            <div className="flex items-center gap-3">
-              <div className="bg-purple-100 rounded-full p-2">
-                {darkMode ? (
-                  <Moon className="w-5 h-5 text-purple-600" />
-                ) : (
-                  <Sun className="w-5 h-5 text-purple-600" />
-                )}
-              </div>
-              <div>
-                <p className="text-gray-800">Appearance</p>
-                <p className="text-gray-500">{darkMode ? 'Dark' : 'Light'} mode</p>
-              </div>
-            </div>
-            <button
-              onClick={onToggleDarkMode}
-              className={`w-14 h-8 rounded-full transition-colors ${
-                darkMode ? 'bg-purple-400' : 'bg-gray-300'
-              }`}
-            >
-              <div
-                className={`w-6 h-6 bg-white rounded-full shadow-md transition-transform ${
-                  darkMode ? 'translate-x-7' : 'translate-x-1'
-                }`}
-              />
-            </button>
-          </div>
+          {/* Theme toggle removed */}
         </div>
 
         {/* Additional Options */}
-        <div className="bg-white rounded-3xl p-4 shadow-md space-y-1">
-          <button className="w-full flex items-center justify-between p-3 hover:bg-gray-50 rounded-2xl transition-colors">
-            <span className="text-gray-700">Privacy Policy</span>
-            <ChevronRight className="w-5 h-5 text-gray-400" />
-          </button>
-          <button className="w-full flex items-center justify-between p-3 hover:bg-gray-50 rounded-2xl transition-colors">
-            <span className="text-gray-700">Help & Support</span>
-            <ChevronRight className="w-5 h-5 text-gray-400" />
-          </button>
-          <button className="w-full flex items-center justify-between p-3 hover:bg-gray-50 rounded-2xl transition-colors">
-            <span className="text-gray-700">About MindLink</span>
-            <ChevronRight className="w-5 h-5 text-gray-400" />
-          </button>
+        <div className="space-y-3">
+          <div className="bg-white rounded-3xl p-4 shadow-md">
+            <div className="flex items-center gap-3 mb-2">
+              <ChevronRight className="w-5 h-5 text-gray-400" />
+              <span className="text-gray-800 font-medium">Privacy Policy</span>
+            </div>
+            <p className="text-gray-600 text-sm leading-relaxed">
+              MindLink is built with MongoDB for secure data storage and designed in Figma. Passwords are protected with hashing and we do not share your information with other companies.
+            </p>
+          </div>
+
+          <div className="bg-white rounded-3xl p-4 shadow-md">
+            <div className="flex items-center gap-3 mb-2">
+              <ChevronRight className="w-5 h-5 text-gray-400" />
+              <span className="text-gray-800 font-medium">Help & Support</span>
+            </div>
+            <p className="text-gray-600 text-sm leading-relaxed">
+              Need help? In Canada you can call or text <span className="font-semibold text-gray-800">9-8-8: Suicide Crisis Helpline</span>.
+            </p>
+          </div>
+
+          <div className="bg-white rounded-3xl p-4 shadow-md">
+            <div className="flex items-center gap-3 mb-2">
+              <ChevronRight className="w-5 h-5 text-gray-400" />
+              <span className="text-gray-800 font-medium">About MindLink</span>
+            </div>
+            <p className="text-gray-600 text-sm leading-relaxed">
+              MindLink is part of the SOEN357 project, created for young users to build healthy reflection habits through mood logging, streaks, and supportive content.
+            </p>
+          </div>
         </div>
 
         {/* Logout Button */}

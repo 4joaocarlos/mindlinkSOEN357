@@ -1,6 +1,7 @@
 const express = require("express");
 const JournalEntry = require("../models/JournalEntry");
 const Badge = require("../models/Badge");
+const User = require("../models/User");
 const auth = require("../middleware/auth");
 
 const router = express.Router();
@@ -127,7 +128,6 @@ router.get("/badges", async (req, res) => {
 router.get("/dashboard", async (req, res) => {
   try {
     // Get user info
-    const User = require("../models/User");
     const user = await User.findById(req.userId);
 
     if (!user) {
@@ -138,6 +138,7 @@ router.get("/dashboard", async (req, res) => {
       id: user._id,
       name: user.name,
       email: user.email,
+      avatar: user.avatar,
       createdAt: user.createdAt
     };
 
@@ -180,6 +181,46 @@ router.get("/dashboard", async (req, res) => {
     });
   } catch (error) {
     console.error('Get dashboard error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error'
+    });
+  }
+});
+
+// Update profile (name, avatar)
+router.put("/profile", async (req, res) => {
+  try {
+    const { name, avatar } = req.body;
+
+    if (!name || !name.trim()) {
+      return res.status(400).json({ error: "Name is required" });
+    }
+
+    const user = await User.findById(req.userId);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    user.name = name.trim();
+    if (avatar !== undefined) {
+      user.avatar = avatar;
+    }
+
+    await user.save();
+
+    res.json({
+      success: true,
+      data: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        avatar: user.avatar,
+        createdAt: user.createdAt
+      }
+    });
+  } catch (error) {
+    console.error('Update profile error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error'

@@ -10,9 +10,10 @@ import { MotivationalScreen } from './components/MotivationalScreen';
 import { ProfileScreen } from './components/ProfileScreen';
 import { JournalScreen } from './components/JournalScreen';
 import { BottomNav } from './components/BottomNav';
-import { userAPI, authAPI, User, Badge, UserStats } from './utils/api';
+import { EditProfileScreen } from './components/EditProfileScreen';
+import { userAPI, authAPI, moodAPI, User, Badge, UserStats } from './utils/api';
 
-export type Screen = 'login' | 'onboarding' | 'home' | 'log' | 'feedback' | 'trends' | 'profile' | 'streaks' | 'motivational' | 'journal';
+export type Screen = 'login' | 'onboarding' | 'home' | 'log' | 'feedback' | 'trends' | 'profile' | 'streaks' | 'motivational' | 'journal' | 'editProfile';
 
 export interface MoodLog {
   id: string;
@@ -23,7 +24,8 @@ export interface MoodLog {
   note?: string;
 }
 
-// Using Badge type from API utils
+// Simple fallback badges for when the API doesn't return any (keeps UI happy)
+const getInitialBadges = (): Badge[] => [];
 
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState<Screen>('login');
@@ -33,8 +35,6 @@ export default function App() {
   const [moodLogs, setMoodLogs] = useState<MoodLog[]>([]);
 
   const [badges, setBadges] = useState<Badge[]>([]);
-
-  const [darkMode, setDarkMode] = useState(false);
 
   // Check for existing logged-in user on mount
   useEffect(() => {
@@ -97,6 +97,12 @@ export default function App() {
     setStreakCount(0);
     setBadges(getInitialBadges());
     setCurrentScreen('login');
+  };
+
+  const handleProfileUpdated = (updatedUser: UserType) => {
+    setUser(updatedUser);
+    localStorage.setItem('mindlink_current_user', JSON.stringify(updatedUser));
+    setCurrentScreen('profile');
   };
 
   const handleMoodSubmit = async (mood: string, emoji: string, intensity: number, note?: string) => {
@@ -180,22 +186,29 @@ export default function App() {
         return (
           <ProfileScreen 
             user={user}
-            darkMode={darkMode} 
-            onToggleDarkMode={() => setDarkMode(!darkMode)}
             onLogout={handleLogout}
             totalLogs={moodLogs.length}
             streakCount={streakCount}
             badgeCount={badges.filter(b => b.unlocked).length}
+            onEditProfile={() => setCurrentScreen('editProfile')}
           />
         );
       case 'journal':
         return <JournalScreen moodLogs={moodLogs} onBack={() => setCurrentScreen('home')} />;
+      case 'editProfile':
+        return (
+          <EditProfileScreen
+            user={user}
+            onBack={() => setCurrentScreen('profile')}
+            onProfileUpdated={handleProfileUpdated}
+          />
+        );
       default:
         return null;
     }
   };
 
-  const showBottomNav = !['login', 'onboarding', 'feedback', 'streaks', 'motivational', 'journal'].includes(currentScreen);
+  const showBottomNav = !['login', 'onboarding', 'feedback', 'streaks', 'motivational', 'journal', 'editProfile'].includes(currentScreen);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 flex items-center justify-center p-4">

@@ -46,6 +46,7 @@ router.post("/register", async (req, res) => {
           id: user._id,
           name: user.name,
           email: user.email,
+          avatar: user.avatar,
           createdAt: user.createdAt
         }
       }
@@ -61,7 +62,8 @@ router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const user = await User.findOne({ email: email.toLowerCase() });
+    // Need passwordHash for comparison (it's excluded by default)
+    const user = await User.findOne({ email: email.toLowerCase() }).select("+passwordHash");
     if (!user) {
       return res.status(401).json({ error: "Invalid credentials" });
     }
@@ -85,6 +87,7 @@ router.post("/login", async (req, res) => {
           id: user._id,
           name: user.name,
           email: user.email,
+          avatar: user.avatar,
           createdAt: user.createdAt
         }
       }
@@ -109,6 +112,7 @@ router.get("/me", auth, async (req, res) => {
         id: user._id,
         name: user.name,
         email: user.email,
+        avatar: user.avatar,
         createdAt: user.createdAt,
         lastLogin: user.lastLogin
       }

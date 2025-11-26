@@ -1,5 +1,6 @@
 import React from 'react';
 import { Flame, ChevronRight, BookOpen } from 'lucide-react';
+import { getRotatingQuote } from '../utils/quotes';
 
 interface HomeScreenProps {
   userName: string | null;
@@ -11,15 +12,7 @@ interface HomeScreenProps {
 }
 
 export function HomeScreen({ userName, streakCount, onLogMood, onViewStreaks, onViewMotivational, onViewJournal }: HomeScreenProps) {
-  const motivationalQuotes = [
-    "Every day is a fresh start. Make it count! 💚",
-    "You're doing great. Keep showing up for yourself! 🌟",
-    "Small steps lead to big changes. ✨",
-    "Your feelings are valid. Take time to understand them. 🌸",
-    "Progress, not perfection. You've got this! 💪"
-  ];
-
-  const randomQuote = motivationalQuotes[Math.floor(Math.random() * motivationalQuotes.length)];
+  const rotatingQuote = getRotatingQuote();
 
   return (
     <div className="h-full bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 p-6 pt-16 pb-24 overflow-y-auto">
@@ -62,7 +55,7 @@ export function HomeScreen({ userName, streakCount, onLogMood, onViewStreaks, on
       >
         <p className="text-purple-600 mb-2">💭 Daily Inspiration</p>
         <p className="text-gray-700">
-          {randomQuote}
+          {rotatingQuote.quote} — {rotatingQuote.author}
         </p>
       </div>
 

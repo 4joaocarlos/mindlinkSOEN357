@@ -1,33 +1,32 @@
 import React from 'react';
 import { ArrowLeft, Heart, Sparkles, Sun } from 'lucide-react';
+import { getRotatingQuote, getRotatingStressedMessage, getRotatingTiredMessage, getRotatingHappyMessage, getRotatingAffirmations } from '../utils/quotes';
 
 interface MotivationalScreenProps {
   onBack: () => void;
 }
 
 export function MotivationalScreen({ onBack }: MotivationalScreenProps) {
-  const dailyQuote = {
-    quote: "The only way to do great work is to love what you do.",
-    author: "Steve Jobs"
-  };
+  const dailyQuote = getRotatingQuote();
+  const affirmations = getRotatingAffirmations();
 
   const moodBasedMessages = [
     {
       icon: <Heart className="w-6 h-6 text-pink-500" />,
       title: "When feeling stressed",
-      message: "Take a deep breath. You're stronger than you think.",
+      message: getRotatingStressedMessage(),
       gradient: "from-pink-100 to-rose-100"
     },
     {
       icon: <Sun className="w-6 h-6 text-yellow-500" />,
       title: "When feeling tired",
-      message: "Rest is productive. Give yourself permission to recharge.",
+      message: getRotatingTiredMessage(),
       gradient: "from-yellow-100 to-amber-100"
     },
     {
       icon: <Sparkles className="w-6 h-6 text-purple-500" />,
       title: "When feeling happy",
-      message: "Celebrate this moment! You deserve all the joy.",
+      message: getRotatingHappyMessage(),
       gradient: "from-purple-100 to-violet-100"
     },
   ];
@@ -98,22 +97,12 @@ export function MotivationalScreen({ onBack }: MotivationalScreenProps) {
             Daily Affirmations
           </h3>
           <ul className="space-y-3">
-            <li className="flex items-start gap-3">
-              <span className="text-purple-400">✨</span>
-              <span className="text-gray-600">I am capable of handling whatever comes my way</span>
-            </li>
-            <li className="flex items-start gap-3">
-              <span className="text-purple-400">✨</span>
-              <span className="text-gray-600">My feelings are valid and important</span>
-            </li>
-            <li className="flex items-start gap-3">
-              <span className="text-purple-400">✨</span>
-              <span className="text-gray-600">I choose to focus on what I can control</span>
-            </li>
-            <li className="flex items-start gap-3">
-              <span className="text-purple-400">✨</span>
-              <span className="text-gray-600">I am growing and learning every day</span>
-            </li>
+            {affirmations.map((affirmation, idx) => (
+              <li key={idx} className="flex items-start gap-3">
+                <span className="text-purple-400">✨</span>
+                <span className="text-gray-600">{affirmation}</span>
+              </li>
+            ))}
           </ul>
         </div>
       </div>
