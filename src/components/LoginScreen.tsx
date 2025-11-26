@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { LogIn, UserPlus, Mail, Lock, User } from 'lucide-react';
+import { authAPI, RegisterRequest, LoginRequest } from '../utils/api';
 
 export interface User {
   id: string;
@@ -24,115 +25,67 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
     return email.trim().toLowerCase();
   };
 
-  // Simple in-memory storage simulation (in a real app, this would be a backend)
-  const getStoredUsers = (): User[] => {
-    try {
-      const stored = localStorage.getItem('mindlink_users');
-      if (!stored) return [];
-      const parsed = JSON.parse(stored);
-      return Array.isArray(parsed) ? parsed : [];
-    } catch (error) {
-      console.error('Error reading users from localStorage:', error);
-      return [];
-    }
-  };
-
-  const saveUser = (user: User) => {
-    try {
-      const users = getStoredUsers();
-      // Check if user already exists (prevent duplicates)
-      const existingIndex = users.findIndex(u => u.id === user.id || u.email.toLowerCase() === user.email.toLowerCase());
-      if (existingIndex >= 0) {
-        users[existingIndex] = user; // Update existing
-      } else {
-        users.push(user); // Add new
-      }
-      localStorage.setItem('mindlink_users', JSON.stringify(users));
-      console.log('User saved:', user.email, 'Total users:', users.length);
-    } catch (error) {
-      console.error('Error saving user to localStorage:', error);
-      throw error;
-    }
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setName('');
+    setEmail('');
+    setPassword('');
 
-    if (isSignUp) {
-      // Sign up logic
-      if (!name.trim() || !email.trim() || !password.trim()) {
-        setError('Please fill in all fields');
-        return;
-      }
-
-      if (password.length < 6) {
-        setError('Password must be at least 6 characters');
-        return;
-      }
-
-      const normalizedEmail = normalizeEmail(email);
-      const users = getStoredUsers();
-      const existingUser = users.find(u => normalizeEmail(u.email) === normalizedEmail);
-      
-      if (existingUser) {
-        setError('An account with this email already exists');
-        return;
-      }
-
-      const newUser: User = {
-        id: Date.now().toString(),
-        name: name.trim(),
-        email: normalizedEmail,
-        createdAt: new Date().toISOString(),
-      };
-
-      // Store user and password (in a real app, password would be hashed)
-      try {
-        saveUser(newUser);
-        localStorage.setItem(`mindlink_password_${newUser.id}`, password);
-        localStorage.setItem('mindlink_current_user', JSON.stringify(newUser));
-        
-        // Verify it was saved
-        const verifyUsers = getStoredUsers();
-        const verifyUser = verifyUsers.find(u => u.email === newUser.email);
-        if (!verifyUser) {
-          setError('Failed to save account. Please try again.');
+    try {
+      if (isSignUp) {
+        // Sign up logic
+        if (!name.trim() || !email.trim() || !password.trim()) {
+          setError('Please fill in all fields');
           return;
         }
-        
-        console.log('Account created successfully:', newUser.email);
-        onLogin(newUser);
-      } catch (error) {
-        console.error('Error creating account:', error);
-        setError('Failed to create account. Please try again.');
-      }
-    } else {
-      // Login logic
-      if (!email.trim() || !password.trim()) {
-        setError('Please enter your email and password');
-        return;
-      }
 
-      const normalizedEmail = normalizeEmail(email);
-      const users = getStoredUsers();
-      const user = users.find(u => normalizeEmail(u.email) === normalizedEmail);
-      
-      console.log('Login attempt:', normalizedEmail, 'Total users:', users.length, 'Users:', users.map(u => u.email));
-      
-      if (!user) {
-        setError('No account found with this email. Please sign up first.');
-        return;
-      }
+        if (password.length < 6) {
+          setError('Password must be at least 6 characters');
+          return;
+        }
 
-      const storedPassword = localStorage.getItem(`mindlink_password_${user.id}`);
-      if (storedPassword !== password) {
-        setError('Incorrect password');
-        return;
-      }
+        const registerData: RegisterRequest = {
+          name: name.trim(),
+          email: normalizeEmail(email),
+          password
+        };
 
-      localStorage.setItem('mindlink_current_user', JSON.stringify(user));
-      onLogin(user);
+        const response = await authAPI.register(registerData);
+
+        if (response.success && response.data) {
+          localStorage.setItem('mindlink_token', response.data.token);
+          localStorage.setItem('mindlink_current_user', JSON.stringify(response.data.user));
+          console.log('Account created successfully:', response.data.user.email);
+          onLogin(response.data.user);
+        } else {
+          setError(response.message || 'Failed to create account');
+        }
+      } else {
+        // Login logic
+        if (!email.trim() || !password.trim()) {
+          setError('Please enter your email and password');
+          return;
+        }
+
+        const loginData: LoginRequest = {
+          email: normalizeEmail(email),
+          password
+        };
+
+        const response = await authAPI.login(loginData);
+
+        if (response.success && response.data) {
+          localStorage.setItem('mindlink_token', response.data.token);
+          localStorage.setItem('mindlink_current_user', JSON.stringify(response.data.user));
+          onLogin(response.data.user);
+        } else {
+          setError(response.message || 'Invalid credentials');
+        }
+      }
+    } catch (error: any) {
+      console.error('Auth error:', error);
+      setError(error.message || 'An error occurred. Please try again.');
     }
   };
 

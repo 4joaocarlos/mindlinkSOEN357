@@ -1,13 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { MoodLog } from '../App';
+import { moodAPI, MoodLog } from '../utils/api';
+import { mockMoodLogs } from '../utils/mockApi';
 
 interface TrendsScreenProps {
-  moodLogs: MoodLog[];
+  onBack?: () => void;
 }
 
-export function TrendsScreen({ moodLogs }: TrendsScreenProps) {
+export function TrendsScreen({ onBack }: TrendsScreenProps) {
   const [activeTab, setActiveTab] = useState<'mood' | 'consistency' | 'summary'>('mood');
+  const [moodLogs, setMoodLogs] = useState<MoodLog[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Use mock data for testing
+    setMoodLogs(mockMoodLogs);
+    setLoading(false);
+  }, []);
 
   // Helper function to parse date string (YYYY-MM-DD) to Date object
   const parseDate = (dateString: string): Date => {
@@ -166,7 +175,11 @@ export function TrendsScreen({ moodLogs }: TrendsScreenProps) {
 
       {/* Content */}
       <div className="flex-1 px-6 pb-6 overflow-y-auto">
-        {activeTab === 'mood' && (
+        {loading ? (
+          <div className="flex items-center justify-center h-full">
+            <div className="text-gray-500">Loading trends data...</div>
+          </div>
+        ) : activeTab === 'mood' && (
           <div className="bg-white rounded-3xl p-6 shadow-lg">
             <h3 className="text-gray-700 mb-4">
               Mood Intensity Over Time

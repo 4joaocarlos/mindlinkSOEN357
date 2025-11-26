@@ -1,0 +1,21 @@
+# Environment Configuration
+NODE_ENV=development
+
+# Server Configuration
+PORT=3001
+FRONTEND_URL=http://localhost:5173
+
+# MongoDB Atlas Configuration
+# Replace with your actual MongoDB Atlas connection string
+# Get this from: https://cloud.mongodb.com → Connect → Connect your application
+MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/mindlink?retryWrites=true&w=majority
+
+# JWT Configuration
+# Generate a secure random string for production
+JWT_SECRET=your-super-secret-jwt-key-change-this-in-production-make-it-long-and-random-123456789
+JWT_EXPIRE=7d
+
+# Email Configuration (optional - for password reset)
+# EMAIL_SERVICE=gmail
+# EMAIL_USER=your-email@gmail.com
+# EMAIL_PASS=your-app-password

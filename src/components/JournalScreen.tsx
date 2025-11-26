@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { ArrowLeft, BookOpen } from 'lucide-react';
-import { MoodLog } from '../App';
+import { journalAPI, MoodLog } from '../utils/api';
 
 interface JournalScreenProps {
   moodLogs: MoodLog[];
@@ -8,13 +8,31 @@ interface JournalScreenProps {
 }
 
 export function JournalScreen({ moodLogs, onBack }: JournalScreenProps) {
-  const logsWithNotes = moodLogs.filter(log => log.note && log.note.trim() !== '');
+  const [journalEntries, setJournalEntries] = useState<MoodLog[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadJournalEntries = async () => {
+      try {
+        const response = await journalAPI.getEntries();
+        if (response.success && response.data) {
+          setJournalEntries(response.data);
+        }
+      } catch (error) {
+        console.error('Error loading journal entries:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadJournalEntries();
+  }, []);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
+    return date.toLocaleDateString('en-US', {
       weekday: 'short',
-      month: 'short', 
+      month: 'short',
       day: 'numeric',
       year: 'numeric'
     });
@@ -37,7 +55,11 @@ export function JournalScreen({ moodLogs, onBack }: JournalScreenProps) {
 
       {/* Content */}
       <div className="flex-1 px-6 pb-6 overflow-y-auto">
-        {logsWithNotes.length === 0 ? (
+        {loading ? (
+          <div className="flex items-center justify-center h-full">
+            <div className="text-gray-500">Loading journal entries...</div>
+          </div>
+        ) : journalEntries.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center px-8">
             <div className="bg-white rounded-full p-6 mb-4">
               <BookOpen className="w-12 h-12 text-orange-400" />
@@ -51,28 +73,28 @@ export function JournalScreen({ moodLogs, onBack }: JournalScreenProps) {
           </div>
         ) : (
           <div className="space-y-4">
-            {logsWithNotes.reverse().map((log) => (
+            {journalEntries.map((entry) => (
               <div
-                key={log.id}
+                key={entry.id}
                 className="bg-white rounded-3xl p-6 shadow-md hover:shadow-lg transition-shadow"
               >
                 <div className="flex items-center gap-3 mb-4">
-                  <span className="text-4xl">{log.emoji}</span>
+                  <span className="text-4xl">{entry.emoji}</span>
                   <div className="flex-1">
                     <p className="text-gray-800 capitalize">
-                      {log.mood}
+                      {entry.mood}
                     </p>
                     <p className="text-gray-500">
-                      {formatDate(log.date)}
+                      {formatDate(entry.date)}
                     </p>
                   </div>
                   <span className="bg-gradient-to-r from-purple-100 to-pink-100 px-3 py-1 rounded-full text-purple-700">
-                    {log.intensity}%
+                    {entry.intensity}%
                   </span>
                 </div>
                 <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-4">
                   <p className="text-gray-700 leading-relaxed">
-                    {log.note}
+                    {entry.note}
                   </p>
                 </div>
               </div>
