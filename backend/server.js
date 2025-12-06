@@ -7,13 +7,28 @@ require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+const allowedOrigins = (process.env.FRONTEND_URL || 'http://localhost:5173')
+  .split(',')
+  .map(origin => origin.trim())
+  .filter(Boolean);
+
+// Trust proxy so rate limiting sees the correct IPs on Render
+app.set('trust proxy', 1);
 
 // Security middleware
 app.use(helmet());
-app.use(cors());
-// new 
-
-
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Allow server-to-server calls (no origin) and configured frontends
+      if (!origin || allowedOrigins.length === 0 || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      return callback(new Error('Not allowed by CORS'), false);
+    },
+    credentials: true,
+  })
+);
 
 // Rate limiting
 const limiter = rateLimit({
@@ -52,6 +67,12 @@ app.get('/api/health', (req, res) => {
 
 // Error handling middleware
 app.use((err, req, res, next) => {
+  if (err.message === 'Not allowed by CORS') {
+    return res.status(403).json({
+      success: false,
+      message: 'CORS: origin not allowed',
+    });
+  }
   console.error(err.stack);
   res.status(500).json({
     success: false,
