@@ -1,3 +1,4 @@
+// Trends and analytics view for mood data.
 import React, { useState, useEffect } from 'react';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { moodAPI, MoodLog } from '../utils/api';
@@ -32,13 +33,11 @@ export function TrendsScreen({ onBack }: TrendsScreenProps) {
     loadMoodLogs();
   }, []);
 
-  // Helper function to parse date string (YYYY-MM-DD) to Date object
   const parseDate = (dateString: string): Date => {
     const [year, month, day] = dateString.split('-').map(Number);
     return new Date(year, month - 1, day);
   };
 
-  // Prepare mood data for chart - sort by date and format
   const moodData = [...moodLogs]
     .sort((a, b) => {
       const dateA = parseDate(a.date);
@@ -56,7 +55,6 @@ export function TrendsScreen({ onBack }: TrendsScreenProps) {
       };
     });
 
-  // Calculate consistency data (logs per day of week)
   const dayOfWeekCounts: { [key: string]: number } = {
     'Sun': 0,
     'Mon': 0,
@@ -75,7 +73,6 @@ export function TrendsScreen({ onBack }: TrendsScreenProps) {
     }
   });
 
-  // Order days starting from Sunday (standard week format)
   const consistencyData = [
     { day: 'Sun', logs: dayOfWeekCounts['Sun'] },
     { day: 'Mon', logs: dayOfWeekCounts['Mon'] },
@@ -86,7 +83,6 @@ export function TrendsScreen({ onBack }: TrendsScreenProps) {
     { day: 'Sat', logs: dayOfWeekCounts['Sat'] },
   ];
 
-  // Calculate mood counts from actual logs
   const moodCounts = {
     happy: moodLogs.filter(log => log.mood === 'happy').length,
     calm: moodLogs.filter(log => log.mood === 'calm').length,
@@ -96,20 +92,17 @@ export function TrendsScreen({ onBack }: TrendsScreenProps) {
     energized: moodLogs.filter(log => log.mood === 'energized').length,
   };
 
-  // Calculate summary statistics
   const totalLogs = moodLogs.length;
   const averageIntensity = moodLogs.length > 0
     ? Math.round(moodLogs.reduce((sum, log) => sum + log.intensity, 0) / moodLogs.length)
     : 0;
   
-  // Find most logged mood
   const moodEntries = Object.entries(moodCounts);
   const mostLoggedMood = moodEntries.reduce((max, [mood, count]) => 
     count > max.count ? { mood, count } : max, 
     { mood: 'happy', count: 0 }
   );
 
-  // Get emoji for mood
   const moodEmojis: { [key: string]: string } = {
     happy: '😊',
     calm: '😌',
@@ -122,15 +115,14 @@ export function TrendsScreen({ onBack }: TrendsScreenProps) {
   const mostLoggedEmoji = moodEmojis[mostLoggedMood.mood] || '😊';
   const mostLoggedLabel = mostLoggedMood.mood.charAt(0).toUpperCase() + mostLoggedMood.mood.slice(1);
 
-  // Calculate this week's logs (Sunday to Saturday)
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const dayOfWeek = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
+  const dayOfWeek = today.getDay();
   const startOfWeek = new Date(today);
-  startOfWeek.setDate(today.getDate() - dayOfWeek); // Go back to Sunday
+  startOfWeek.setDate(today.getDate() - dayOfWeek);
   startOfWeek.setHours(0, 0, 0, 0);
   const endOfWeek = new Date(startOfWeek);
-  endOfWeek.setDate(startOfWeek.getDate() + 6); // Saturday
+  endOfWeek.setDate(startOfWeek.getDate() + 6);
   endOfWeek.setHours(23, 59, 59, 999);
 
   const thisWeekLogs = moodLogs.filter(log => {
@@ -141,7 +133,6 @@ export function TrendsScreen({ onBack }: TrendsScreenProps) {
 
   return (
     <div className="h-full bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 flex flex-col pb-24">
-      {/* Header */}
       <div className="p-6 pt-16">
         <h1 className="text-gray-800 mb-2">
           Trends & Analytics
@@ -151,7 +142,6 @@ export function TrendsScreen({ onBack }: TrendsScreenProps) {
         </p>
       </div>
 
-      {/* Tabs */}
       <div className="px-6 mb-6">
         <div className="bg-white rounded-2xl p-1.5 shadow-sm flex gap-1">
           <button
@@ -187,7 +177,6 @@ export function TrendsScreen({ onBack }: TrendsScreenProps) {
         </div>
       </div>
 
-      {/* Content */}
       <div className="flex-1 px-6 pb-6 overflow-y-auto">
         {loading ? (
           <div className="flex items-center justify-center h-full">

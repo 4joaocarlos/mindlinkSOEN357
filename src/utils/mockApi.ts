@@ -1,10 +1,8 @@
-// Mock API for testing without backend
+// Mock API for testing without the backend service.
 export const mockAPI = {
   register: async (data: any) => {
-    // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 1000));
 
-    // Mock successful registration
     return {
       success: true,
       data: {
@@ -123,7 +121,7 @@ export const mockAPI = {
         },
         {
           id: '2',
-          date: new Date(Date.now() - 86400000).toISOString().split('T')[0], // Yesterday
+          date: new Date(Date.now() - 86400000).toISOString().split('T')[0],
           mood: 'calm',
           emoji: '😌',
           intensity: 65,
@@ -141,7 +139,6 @@ export const mockAPI = {
   }
 };
 
-// Mock data for trends
 export const mockMoodLogs = [
   {
     id: '1',

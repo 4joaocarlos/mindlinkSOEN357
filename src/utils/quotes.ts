@@ -1,10 +1,9 @@
+// Static quotes and rotating messages for the MindLink app.
 export interface Quote {
   quote: string;
   author: string;
 }
 
-// Motivational quotes that rotate on a time slot so everyone sees the same
-// message for a few hours. No backend needed.
 export const motivationalQuotes: Quote[] = [
   { quote: "You miss 100% of the shots you don't take.", author: "Wayne Gretzky" },
   { quote: "It's not whether you get knocked down; it's whether you get up.", author: "Vince Lombardi" },
@@ -48,14 +47,12 @@ export const motivationalQuotes: Quote[] = [
   { quote: "Know your worth. Then add tax.", author: "Unknown" },
 ];
 
-// Rotate the quote every 3 hours so the same quote is shown within the window.
 export function getRotatingQuote(): Quote {
   const slot = Math.floor(Date.now() / (1000 * 60 * 60 * 3));
   const index = slot % motivationalQuotes.length;
   return motivationalQuotes[index];
 }
 
-// Stressed-supportive messages that rotate every 3 hours
 const stressedMessages: string[] = [
   "Slow down. You're doing the best you can.",
   "One step at a time is enough.",
@@ -85,7 +82,6 @@ export function getRotatingStressedMessage(): string {
   return stressedMessages[index];
 }
 
-// Tired-supportive messages that rotate every 3 hours
 const tiredMessages: string[] = [
   "Rest is productive — don't forget that.",
   "Even machines need to recharge.",
@@ -115,7 +111,6 @@ export function getRotatingTiredMessage(): string {
   return tiredMessages[index];
 }
 
-// Happy/celebratory messages that rotate every 3 hours
 const happyMessages: string[] = [
   "I fully embrace the joy I feel right now.",
   "I deserve this happiness and more.",
@@ -145,7 +140,6 @@ export function getRotatingHappyMessage(): string {
   return happyMessages[index];
 }
 
-// Daily affirmations rotate every 3 hours to keep things fresh
 const dailyAffirmations: string[] = [
   "I am capable of achieving great things.",
   "I show up for myself every single day.",
@@ -202,7 +196,6 @@ const dailyAffirmations: string[] = [
 export function getRotatingAffirmations(): string[] {
   const slot = Math.floor(Date.now() / (1000 * 60 * 60 * 3));
   const start = slot % dailyAffirmations.length;
-  // Provide a small slice (up to 4) to keep the list manageable on screen
   const slice: string[] = [];
   for (let i = 0; i < 4; i++) {
     const idx = (start + i) % dailyAffirmations.length;

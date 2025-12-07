@@ -1,3 +1,4 @@
+// Middleware to verify JWT bearer tokens and attach the user id.
 const jwt = require("jsonwebtoken");
 const JWT_SECRET = process.env.JWT_SECRET || "dev-secret-change-me";
 

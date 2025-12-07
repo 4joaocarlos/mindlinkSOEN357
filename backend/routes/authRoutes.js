@@ -1,3 +1,4 @@
+// Authentication routes for user registration, login, and profile info.
 const express = require("express");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
@@ -8,7 +9,6 @@ const router = express.Router();
 
 const JWT_SECRET = process.env.JWT_SECRET || "dev-secret-change-me";
 
-// Register
 router.post("/register", async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -26,7 +26,6 @@ router.post("/register", async (req, res) => {
     await user.setPassword(password);
     await user.save();
 
-    // Create badges for new user
     const predefinedBadges = Badge.getPredefinedBadges();
     const userBadges = predefinedBadges.map(badge => ({
       ...badge,
@@ -57,12 +56,10 @@ router.post("/register", async (req, res) => {
   }
 });
 
-// Login
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Need passwordHash for comparison (it's excluded by default)
     const user = await User.findOne({ email: email.toLowerCase() }).select("+passwordHash");
     if (!user) {
       return res.status(401).json({ error: "Invalid credentials" });
@@ -73,7 +70,6 @@ router.post("/login", async (req, res) => {
       return res.status(401).json({ error: "Invalid credentials" });
     }
 
-    // Update last login
     user.lastLogin = new Date();
     await user.save({ validateBeforeSave: false });
 
@@ -98,7 +94,6 @@ router.post("/login", async (req, res) => {
   }
 });
 
-// Get current user (me)
 router.get("/me", auth, async (req, res) => {
   try {
     const user = await User.findById(req.userId);

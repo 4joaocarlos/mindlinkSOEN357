@@ -1,4 +1,4 @@
-// Simple test script to verify backend is working
+// Script to smoke test the MindLink backend API.
 const fetch = require('node-fetch');
 
 const BASE_URL = 'http://localhost:3001/api';
@@ -7,13 +7,11 @@ async function testBackend() {
   console.log('Testing MindLink Backend...\n');
 
   try {
-    // Test health check
     console.log('1. Testing health check...');
     const healthRes = await fetch(`${BASE_URL}/health`);
     const healthData = await healthRes.json();
     console.log('✅ Health check:', healthData);
 
-    // Test register
     console.log('\n2. Testing user registration...');
     const registerRes = await fetch(`${BASE_URL}/auth/register`, {
       method: 'POST',
@@ -32,7 +30,6 @@ async function testBackend() {
       console.log('✅ Registration:', registerData.success ? 'Success' : 'Failed');
     }
 
-    // Test login
     console.log('\n3. Testing user login...');
     const loginRes = await fetch(`${BASE_URL}/auth/login`, {
       method: 'POST',
@@ -49,10 +46,8 @@ async function testBackend() {
     if (loginData.success) {
       const token = loginData.data.token;
 
-      // Test authenticated endpoints
       console.log('\n4. Testing authenticated endpoints...');
 
-      // Test creating a mood log
       console.log('   - Creating mood log...');
       const moodRes = await fetch(`${BASE_URL}/journals`, {
         method: 'POST',
@@ -71,7 +66,6 @@ async function testBackend() {
       const moodData = await moodRes.json();
       console.log('   ✅ Mood log created:', moodData.success ? 'Success' : 'Failed');
 
-      // Test getting user stats
       console.log('   - Getting user stats...');
       const statsRes = await fetch(`${BASE_URL}/user/stats`, {
         headers: { 'Authorization': `Bearer ${token}` }
@@ -79,7 +73,6 @@ async function testBackend() {
       const statsData = await statsRes.json();
       console.log('   ✅ User stats:', statsData.success ? `Streak: ${statsData.data.currentStreak}` : 'Failed');
 
-      // Test getting streak stats
       console.log('   - Getting streak stats...');
       const streakRes = await fetch(`${BASE_URL}/journals/streak/stats`, {
         headers: { 'Authorization': `Bearer ${token}` }
@@ -95,5 +88,4 @@ async function testBackend() {
   }
 }
 
-// Run tests
 testBackend();

@@ -1,3 +1,4 @@
+// Legacy journal routes for note-based entries.
 const express = require('express');
 const { body, validationResult } = require('express-validator');
 const MoodLog = require('../models/MoodLog');
@@ -5,19 +6,14 @@ const { protect } = require('../middleware/auth');
 
 const router = express.Router();
 
-// All routes require authentication
 router.use(protect);
 
-// @desc    Get journal entries
-// @route   GET /api/journal
-// @access  Private
 router.get('/', async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 20;
     const skip = (page - 1) * limit;
 
-    // Only get entries that have notes (journal entries)
     const journalEntries = await MoodLog.find({
       user: req.user._id,
       note: { $exists: true, $ne: '' }
@@ -50,9 +46,6 @@ router.get('/', async (req, res) => {
   }
 });
 
-// @desc    Get single journal entry
-// @route   GET /api/journal/:id
-// @access  Private
 router.get('/:id', async (req, res) => {
   try {
     const journalEntry = await MoodLog.findOne({
@@ -81,9 +74,6 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// @desc    Update journal entry (note)
-// @route   PUT /api/journal/:id
-// @access  Private
 router.put('/:id', [
   body('note').isString().isLength({ min: 1, max: 1000 }).withMessage('Note must be between 1 and 1000 characters')
 ], async (req, res) => {

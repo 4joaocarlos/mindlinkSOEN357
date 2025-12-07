@@ -1,3 +1,4 @@
+// Express server for the MindLink backend API.
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -12,15 +13,12 @@ const allowedOrigins = (process.env.FRONTEND_URL || 'http://localhost:5173')
   .map(origin => origin.trim())
   .filter(Boolean);
 
-// Trust proxy so rate limiting sees the correct IPs on Render
 app.set('trust proxy', 1);
 
-// Security middleware
 app.use(helmet());
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow server-to-server calls (no origin) and configured frontends
       if (!origin || allowedOrigins.length === 0 || allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
@@ -30,18 +28,15 @@ app.use(
   })
 );
 
-// Rate limiting
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100 // limit each IP to 100 requests per windowMs
+  windowMs: 15 * 60 * 1000,
+  max: 100
 });
 app.use(limiter);
 
-// Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Database connection
 const connectDB = async () => {
   try {
     const conn = await mongoose.connect(process.env.MONGODB_URI, {
@@ -55,17 +50,14 @@ const connectDB = async () => {
   }
 };
 
-// Routes
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/journals', require('./routes/journalRoutes'));
 app.use('/api/user', require('./routes/userRoutes'));
 
-// Health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });
 });
 
-// Error handling middleware
 app.use((err, req, res, next) => {
   if (err.message === 'Not allowed by CORS') {
     return res.status(403).json({
@@ -81,7 +73,6 @@ app.use((err, req, res, next) => {
   });
 });
 
-// 404 handler
 app.use('*', (req, res) => {
   res.status(404).json({
     success: false,
@@ -89,7 +80,6 @@ app.use('*', (req, res) => {
   });
 });
 
-// Start server
 const startServer = async () => {
   try {
     await connectDB();

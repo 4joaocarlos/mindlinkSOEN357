@@ -1,3 +1,4 @@
+// Date helpers for consistent string formatting.
 exports.todayDateString = function () {
   const now = new Date();
   const year = now.getUTCFullYear();

@@ -1,3 +1,4 @@
+// Journal routes for creating, listing, and updating mood entries with badge checks.
 const express = require("express");
 const JournalEntry = require("../models/JournalEntry");
 const Badge = require("../models/Badge");
@@ -6,21 +7,17 @@ const { todayDateString } = require("../utils/dateUtils");
 
 const router = express.Router();
 
-// All routes here require auth
 router.use(auth);
 
-// Helper function to check and unlock badges
 const checkAndUnlockBadges = async (userId) => {
   try {
     const journalEntries = await JournalEntry.find({ user: userId }).sort({ createdAt: -1 });
     const totalLogs = journalEntries.length;
 
-    // Calculate current streak
     let currentStreak = 0;
     const today = todayDateString();
     let checkDate = new Date(today);
 
-    // Get unique dates (one entry per day counts for streak)
     const uniqueDates = [...new Set(journalEntries.map(entry => entry.date))].sort();
 
     for (let i = uniqueDates.length - 1; i >= 0; i--) {
@@ -35,18 +32,14 @@ const checkAndUnlockBadges = async (userId) => {
       }
     }
 
-    // Calculate unique moods
     const uniqueMoods = [...new Set(journalEntries.map(log => log.mood))].length;
 
-    // Calculate logged notes
     const loggedNotes = journalEntries.filter(log => log.note && log.note.trim().length > 0).length;
 
-    // Check calm week (last 7 entries mostly calm)
     const recentEntries = journalEntries.slice(0, 7);
     const calmCount = recentEntries.filter(log => ['calm', 'peaceful', 'content'].includes(log.mood)).length;
     const calmWeek = recentEntries.length >= 7 && calmCount >= 5;
 
-    // Badge criteria
     const badgeCriteria = {
       logs: totalLogs >= 1,
       streak: currentStreak,
@@ -56,10 +49,8 @@ const checkAndUnlockBadges = async (userId) => {
       calmWeek
     };
 
-    // Get all user badges
     const userBadges = await Badge.find({ user: userId });
 
-    // Check each badge
     const predefinedBadges = Badge.getPredefinedBadges();
     const badgesToUnlock = [];
 
@@ -69,7 +60,6 @@ const checkAndUnlockBadges = async (userId) => {
       if (userBadge && !userBadge.unlocked) {
         let shouldUnlock = false;
 
-        // Check criteria
         if (predefinedBadge.badgeId === 'welcome' || predefinedBadge.badgeId === 'beginner') {
           shouldUnlock = badgeCriteria.logs;
         } else if (predefinedBadge.badgeId.startsWith('streak-')) {
@@ -92,7 +82,6 @@ const checkAndUnlockBadges = async (userId) => {
       }
     }
 
-    // Unlock badges
     if (badgesToUnlock.length > 0) {
       await Badge.updateMany(
         { _id: { $in: badgesToUnlock } },
@@ -107,7 +96,6 @@ const checkAndUnlockBadges = async (userId) => {
   }
 };
 
-// Create new mood log entry
 router.post("/", async (req, res) => {
   try {
     const { date, mood, emoji, intensity, note, tags, location, weather } = req.body;
@@ -133,7 +121,6 @@ router.post("/", async (req, res) => {
 
     await entry.save();
 
-    // Check for badge unlocks
     await checkAndUnlockBadges(userId);
 
     res.status(201).json({
@@ -146,7 +133,6 @@ router.post("/", async (req, res) => {
   }
 });
 
-// Get entries in a date range
 router.get("/", async (req, res) => {
   try {
     const userId = req.userId;
@@ -184,7 +170,6 @@ router.get("/", async (req, res) => {
   }
 });
 
-// Get today's entry
 router.get("/today", async (req, res) => {
   try {
     const userId = req.userId;
@@ -200,7 +185,6 @@ router.get("/today", async (req, res) => {
   }
 });
 
-// Get single entry
 router.get("/:id", async (req, res) => {
   try {
     const entry = await JournalEntry.findOne({
@@ -222,7 +206,6 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-// Update entry
 router.put("/:id", async (req, res) => {
   try {
     const entry = await JournalEntry.findOneAndUpdate(
@@ -245,7 +228,6 @@ router.put("/:id", async (req, res) => {
   }
 });
 
-// Delete entry
 router.delete("/:id", async (req, res) => {
   try {
     const entry = await JournalEntry.findOneAndDelete({
@@ -267,7 +249,6 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
-// Get streak info
 router.get("/streak/stats", async (req, res) => {
   try {
     const userId = req.userId;
@@ -277,13 +258,10 @@ router.get("/streak/stats", async (req, res) => {
       .select("date")
       .sort({ date: -1 });
 
-    // Unique date strings, newest first
     const uniqueDates = [...new Set(allEntries.map((e) => e.date))];
 
-    // Compute current streak: consecutive days up to today
     const currentStreak = computeStreak(uniqueDates, today);
 
-    // Compute longest streak
     const longestStreak = computeLongestStreak(uniqueDates);
 
     res.json({
@@ -306,11 +284,11 @@ function computeStreak(datesDesc, todayStr) {
   let currentDay = new Date(todayStr + "T00:00:00Z");
 
   while (true) {
-    const dateStr = currentDay.toISOString().slice(0, 10); // "YYYY-MM-DD" from UTC ISO
+    const dateStr = currentDay.toISOString().slice(0, 10);
 
     if (datesDesc.includes(dateStr)) {
       streak += 1;
-      currentDay.setUTCDate(currentDay.getUTCDate() - 1); // go to previous day
+      currentDay.setUTCDate(currentDay.getUTCDate() - 1);
     } else {
       break;
     }
@@ -321,7 +299,6 @@ function computeStreak(datesDesc, todayStr) {
 
 function computeLongestStreak(datesDesc) {
   if (datesDesc.length === 0) return 0;
-  // Convert to Date objects sorted ascending
   const datesAsc = [...datesDesc]
     .map((d) => new Date(d + "T00:00:00Z"))
     .sort((a, b) => a - b);
@@ -337,7 +314,6 @@ function computeLongestStreak(datesDesc) {
     if (diffDays === 1) {
       current += 1;
     } else if (diffDays > 1) {
-      // gap -> reset
       if (current > longest) longest = current;
       current = 1;
     }

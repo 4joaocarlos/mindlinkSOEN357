@@ -1,3 +1,4 @@
+// Mongoose schema for achievement badges tied to users.
 const mongoose = require("mongoose");
 
 const badgeSchema = new mongoose.Schema(
@@ -36,7 +37,7 @@ const badgeSchema = new mongoose.Schema(
       type: Date
     },
     criteria: {
-      type: mongoose.Schema.Types.Mixed, // Flexible criteria object
+      type: mongoose.Schema.Types.Mixed,
       default: {}
     },
     createdAt: {
@@ -47,11 +48,9 @@ const badgeSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Indexes for efficient queries
 badgeSchema.index({ user: 1, badgeId: 1 }, { unique: true });
 badgeSchema.index({ user: 1, unlocked: 1 });
 
-// Static method to get predefined badges
 badgeSchema.statics.getPredefinedBadges = function() {
   return [
     {

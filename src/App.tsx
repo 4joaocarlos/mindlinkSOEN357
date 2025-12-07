@@ -1,3 +1,4 @@
+// Root application shell for MindLink screens.
 import React, { useState, useEffect } from 'react';
 import { OnboardingScreen } from './components/OnboardingScreen';
 import { LoginScreen, User as UserType } from './components/LoginScreen';
@@ -24,7 +25,6 @@ export interface MoodLog {
   note?: string;
 }
 
-// Simple fallback badges for when the API doesn't return any (keeps UI happy)
 const getInitialBadges = (): Badge[] => [];
 
 export default function App() {
@@ -36,7 +36,6 @@ export default function App() {
 
   const [badges, setBadges] = useState<Badge[]>([]);
 
-  // Check for existing logged-in user on mount
   useEffect(() => {
     const token = localStorage.getItem('mindlink_token');
     const storedUser = localStorage.getItem('mindlink_current_user');
@@ -55,28 +54,23 @@ export default function App() {
     }
   }, []);
 
-
-  // Load user-specific data from backend
   const loadUserData = async (userId: string) => {
     try {
-      // Load dashboard data which includes stats, badges, and recent logs
       const dashboardResponse = await userAPI.getDashboard();
       if (dashboardResponse.success && dashboardResponse.data) {
         const { stats, badges: userBadges, recentLogs } = dashboardResponse.data;
 
         setStreakCount(stats.currentStreak);
         setBadges(userBadges);
-        setMoodLogs(recentLogs); // Load recent logs for display
+        setMoodLogs(recentLogs);
       } else {
         console.error('Failed to load dashboard data');
-        // Fallback to initial data
         setStreakCount(0);
         setBadges(getInitialBadges());
         setMoodLogs([]);
       }
     } catch (error) {
       console.error('Error loading user data:', error);
-      // Fallback to initial data
       setStreakCount(0);
       setBadges(getInitialBadges());
       setMoodLogs([]);
@@ -109,14 +103,12 @@ export default function App() {
     if (!user) return;
 
     try {
-      // Get local date in YYYY-MM-DD format (not UTC)
       const now = new Date();
       const year = now.getFullYear();
       const month = String(now.getMonth() + 1).padStart(2, '0');
       const day = String(now.getDate()).padStart(2, '0');
       const localDate = `${year}-${month}-${day}`;
 
-      // Create mood log via API
       const response = await moodAPI.createLog({
         date: localDate,
         mood,
@@ -129,17 +121,14 @@ export default function App() {
         const newLog = response.data;
         setLastMoodLogged(newLog);
 
-        // Reload user data to get updated stats and badges
         await loadUserData(user.id);
 
         setCurrentScreen('feedback');
       } else {
         console.error('Failed to create mood log:', response.message);
-        // Could show error to user here
       }
     } catch (error) {
       console.error('Error submitting mood:', error);
-      // Could show error to user here
     }
   };
 

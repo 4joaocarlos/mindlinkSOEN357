@@ -1,3 +1,4 @@
+// Mongoose schema and helpers for application users.
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
@@ -17,7 +18,7 @@ const userSchema = new mongoose.Schema(
     passwordHash: {
       type: String,
       required: true,
-      select: false // Don't include in queries by default
+      select: false
     },
     name: {
       type: String,
@@ -44,18 +45,15 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Helper method to set password
 userSchema.methods.setPassword = async function (plainPassword) {
   const salt = await bcrypt.genSalt(10);
   this.passwordHash = await bcrypt.hash(plainPassword, salt);
 };
 
-// Helper method to validate password
 userSchema.methods.validatePassword = async function (plainPassword) {
   return bcrypt.compare(plainPassword, this.passwordHash);
 };
 
-// Generate JWT token
 userSchema.methods.generateAuthToken = function() {
   const JWT_SECRET = process.env.JWT_SECRET || "dev-secret-change-me";
   return jwt.sign(
@@ -65,7 +63,6 @@ userSchema.methods.generateAuthToken = function() {
   );
 };
 
-// Remove password from JSON output
 userSchema.methods.toJSON = function() {
   const userObject = this.toObject();
   delete userObject.passwordHash;

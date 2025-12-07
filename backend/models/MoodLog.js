@@ -1,3 +1,4 @@
+// Mongoose schema for stored mood log entries.
 const mongoose = require('mongoose');
 
 const moodLogSchema = new mongoose.Schema({
@@ -7,7 +8,7 @@ const moodLogSchema = new mongoose.Schema({
     required: true
   },
   date: {
-    type: String, // YYYY-MM-DD format
+    type: String,
     required: [true, 'Please add a date']
   },
   mood: {
@@ -54,11 +55,9 @@ const moodLogSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Index for efficient queries
 moodLogSchema.index({ user: 1, date: -1 });
 moodLogSchema.index({ user: 1, createdAt: -1 });
 
-// Update the updatedAt field before saving
 moodLogSchema.pre('save', function(next) {
   this.updatedAt = Date.now();
   next();

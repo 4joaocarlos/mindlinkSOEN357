@@ -1,3 +1,4 @@
+// Login and registration screen for MindLink.
 import React, { useState } from 'react';
 import { LogIn, UserPlus, Mail, Lock, User } from 'lucide-react';
 import { authAPI, RegisterRequest, LoginRequest } from '../utils/api';
@@ -21,7 +22,6 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
-  // Normalize email for consistent comparison
   const normalizeEmail = (email: string): string => {
     return email.trim().toLowerCase();
   };
@@ -35,7 +35,6 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
 
     try {
       if (isSignUp) {
-        // Sign up logic
         if (!name.trim() || !email.trim() || !password.trim()) {
           setError('Please fill in all fields');
           return;
@@ -63,7 +62,6 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
           setError(response.message || 'Failed to create account');
         }
       } else {
-        // Login logic
         if (!email.trim() || !password.trim()) {
           setError('Please enter your email and password');
           return;
@@ -93,7 +91,6 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
   return (
     <div className="h-full bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 flex flex-col items-center justify-center p-6">
       <div className="w-full max-w-sm">
-        {/* Logo/Header */}
         <div className="text-center mb-8">
           <div className="w-20 h-20 bg-gradient-to-br from-purple-400 to-pink-400 rounded-3xl flex items-center justify-center mx-auto mb-4 shadow-lg">
             <span className="text-4xl">🧠</span>
@@ -106,7 +103,6 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
           </p>
         </div>
 
-        {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           {isSignUp && (
             <div className="bg-white rounded-2xl p-4 shadow-md">
@@ -173,7 +169,6 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
           </button>
         </form>
 
-        {/* Toggle between Sign Up and Login */}
         <div className="mt-6 text-center">
           <button
             onClick={() => {

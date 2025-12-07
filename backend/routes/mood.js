@@ -1,3 +1,4 @@
+// Legacy mood routes handling CRUD and badge unlocks.
 const express = require('express');
 const { body, validationResult } = require('express-validator');
 const MoodLog = require('../models/MoodLog');
@@ -6,16 +7,13 @@ const { protect } = require('../middleware/auth');
 
 const router = express.Router();
 
-// All routes require authentication
 router.use(protect);
 
-// Helper function to check and unlock badges
 const checkAndUnlockBadges = async (userId) => {
   try {
     const moodLogs = await MoodLog.find({ user: userId }).sort({ createdAt: -1 });
     const totalLogs = moodLogs.length;
 
-    // Calculate current streak
     let currentStreak = 0;
     const today = new Date().toISOString().split('T')[0];
     let checkDate = new Date(today);
@@ -32,18 +30,14 @@ const checkAndUnlockBadges = async (userId) => {
       }
     }
 
-    // Calculate unique moods
     const uniqueMoods = [...new Set(moodLogs.map(log => log.mood))].length;
 
-    // Calculate logged notes
     const loggedNotes = moodLogs.filter(log => log.note && log.note.trim().length > 0).length;
 
-    // Check calm week (last 7 entries mostly calm)
     const recentLogs = moodLogs.slice(0, 7);
     const calmCount = recentLogs.filter(log => ['calm', 'peaceful', 'content'].includes(log.mood)).length;
     const calmWeek = recentLogs.length >= 7 && calmCount >= 5;
 
-    // Badge criteria
     const badgeCriteria = {
       logs: totalLogs >= 1,
       streak: currentStreak,
@@ -53,10 +47,8 @@ const checkAndUnlockBadges = async (userId) => {
       calmWeek
     };
 
-    // Get all user badges
     const userBadges = await Badge.find({ user: userId });
 
-    // Check each badge
     const predefinedBadges = Badge.getPredefinedBadges();
     const badgesToUnlock = [];
 
@@ -66,7 +58,6 @@ const checkAndUnlockBadges = async (userId) => {
       if (userBadge && !userBadge.unlocked) {
         let shouldUnlock = false;
 
-        // Check criteria
         if (predefinedBadge.badgeId === 'welcome' || predefinedBadge.badgeId === 'beginner') {
           shouldUnlock = badgeCriteria.logs;
         } else if (predefinedBadge.badgeId.startsWith('streak-')) {
@@ -89,7 +80,6 @@ const checkAndUnlockBadges = async (userId) => {
       }
     }
 
-    // Unlock badges
     if (badgesToUnlock.length > 0) {
       await Badge.updateMany(
         { _id: { $in: badgesToUnlock } },
@@ -104,9 +94,6 @@ const checkAndUnlockBadges = async (userId) => {
   }
 };
 
-// @desc    Get all mood logs for user
-// @route   GET /api/mood
-// @access  Private
 router.get('/', async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -139,9 +126,6 @@ router.get('/', async (req, res) => {
   }
 });
 
-// @desc    Get single mood log
-// @route   GET /api/mood/:id
-// @access  Private
 router.get('/:id', async (req, res) => {
   try {
     const moodLog = await MoodLog.findOne({
@@ -169,9 +153,6 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// @desc    Create mood log
-// @route   POST /api/mood
-// @access  Private
 router.post('/', [
   body('date').isISO8601().withMessage('Please provide a valid date'),
   body('mood').isString().isLength({ min: 1 }).withMessage('Please provide a mood'),
@@ -190,7 +171,6 @@ router.post('/', [
 
     const { date, mood, emoji, intensity, note, tags, location, weather } = req.body;
 
-    // Check if log already exists for this date
     const existingLog = await MoodLog.findOne({
       user: req.user._id,
       date: date
@@ -215,7 +195,6 @@ router.post('/', [
       weather: weather || ''
     });
 
-    // Check for badge unlocks
     await checkAndUnlockBadges(req.user._id);
 
     res.status(201).json({
@@ -231,9 +210,6 @@ router.post('/', [
   }
 });
 
-// @desc    Update mood log
-// @route   PUT /api/mood/:id
-// @access  Private
 router.put('/:id', [
   body('date').optional().isISO8601().withMessage('Please provide a valid date'),
   body('mood').optional().isString().isLength({ min: 1 }).withMessage('Please provide a mood'),
@@ -276,9 +252,6 @@ router.put('/:id', [
   }
 });
 
-// @desc    Delete mood log
-// @route   DELETE /api/mood/:id
-// @access  Private
 router.delete('/:id', async (req, res) => {
   try {
     const moodLog = await MoodLog.findOneAndDelete({

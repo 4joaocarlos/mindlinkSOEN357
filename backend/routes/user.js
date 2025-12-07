@@ -1,3 +1,4 @@
+// Legacy user routes for stats, badges, and dashboard data.
 const express = require('express');
 const MoodLog = require('../models/MoodLog');
 const Badge = require('../models/Badge');
@@ -5,12 +6,8 @@ const { protect } = require('../middleware/auth');
 
 const router = express.Router();
 
-// All routes require authentication
 router.use(protect);
 
-// @desc    Get user stats
-// @route   GET /api/user/stats
-// @access  Private
 router.get('/stats', async (req, res) => {
   try {
     const moodLogs = await MoodLog.find({ user: req.user._id }).sort({ date: -1 });
@@ -29,7 +26,6 @@ router.get('/stats', async (req, res) => {
       });
     }
 
-    // Calculate current streak
     let currentStreak = 0;
     const today = new Date().toISOString().split('T')[0];
     let checkDate = new Date(today);
@@ -46,7 +42,6 @@ router.get('/stats', async (req, res) => {
       }
     }
 
-    // Calculate longest streak
     let longestStreak = 0;
     let tempStreak = 1;
 
@@ -64,11 +59,9 @@ router.get('/stats', async (req, res) => {
       }
     }
 
-    // Calculate average intensity
     const totalIntensity = moodLogs.reduce((sum, log) => sum + log.intensity, 0);
     const averageIntensity = Math.round(totalIntensity / moodLogs.length);
 
-    // Find most common mood
     const moodCounts = {};
     moodLogs.forEach(log => {
       moodCounts[log.mood] = (moodCounts[log.mood] || 0) + 1;
@@ -103,9 +96,6 @@ router.get('/stats', async (req, res) => {
   }
 });
 
-// @desc    Get user badges
-// @route   GET /api/user/badges
-// @access  Private
 router.get('/badges', async (req, res) => {
   try {
     const badges = await Badge.find({ user: req.user._id })
@@ -124,12 +114,8 @@ router.get('/badges', async (req, res) => {
   }
 });
 
-// @desc    Get user dashboard data
-// @route   GET /api/user/dashboard
-// @access  Private
 router.get('/dashboard', async (req, res) => {
   try {
-    // Get user info
     const user = {
       id: req.user._id,
       name: req.user.name,
@@ -137,7 +123,6 @@ router.get('/dashboard', async (req, res) => {
       createdAt: req.user.createdAt
     };
 
-    // Get stats
     const statsResponse = await fetch(`${req.protocol}://${req.get('host')}/api/user/stats`, {
       headers: {
         'Authorization': req.headers.authorization,
@@ -152,7 +137,6 @@ router.get('/dashboard', async (req, res) => {
       lastLogDate: null
     };
 
-    // Get badges
     const badgesResponse = await fetch(`${req.protocol}://${req.get('host')}/api/user/badges`, {
       headers: {
         'Authorization': req.headers.authorization,
@@ -162,7 +146,6 @@ router.get('/dashboard', async (req, res) => {
 
     const badgesData = badgesResponse.ok ? (await badgesResponse.json()).data : [];
 
-    // Get recent logs
     const recentLogs = await MoodLog.find({ user: req.user._id })
       .sort({ createdAt: -1 })
       .limit(5);

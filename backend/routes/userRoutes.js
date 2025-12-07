@@ -1,3 +1,4 @@
+// Routes for user stats, badges, dashboard data, and profile updates.
 const express = require("express");
 const JournalEntry = require("../models/JournalEntry");
 const Badge = require("../models/Badge");
@@ -6,10 +7,8 @@ const auth = require("../middleware/auth");
 
 const router = express.Router();
 
-// All routes here require auth
 router.use(auth);
 
-// Get user stats
 router.get("/stats", async (req, res) => {
   try {
     const journalEntries = await JournalEntry.find({ user: req.userId }).sort({ date: -1 });
@@ -28,12 +27,10 @@ router.get("/stats", async (req, res) => {
       });
     }
 
-    // Calculate current streak
     let currentStreak = 0;
     const today = new Date().toISOString().split('T')[0];
     let checkDate = new Date(today);
 
-    // Get unique dates (one entry per day counts for streak)
     const uniqueDates = [...new Set(journalEntries.map(entry => entry.date))].sort();
 
     for (let i = uniqueDates.length - 1; i >= 0; i--) {
@@ -48,7 +45,6 @@ router.get("/stats", async (req, res) => {
       }
     }
 
-    // Calculate longest streak
     let longestStreak = 0;
     let tempStreak = 1;
 
@@ -66,11 +62,9 @@ router.get("/stats", async (req, res) => {
       }
     }
 
-    // Calculate average intensity
     const totalIntensity = journalEntries.reduce((sum, log) => sum + log.intensity, 0);
     const averageIntensity = Math.round(totalIntensity / journalEntries.length);
 
-    // Find most common mood
     const moodCounts = {};
     journalEntries.forEach(log => {
       moodCounts[log.mood] = (moodCounts[log.mood] || 0) + 1;
@@ -105,7 +99,6 @@ router.get("/stats", async (req, res) => {
   }
 });
 
-// Get user badges
 router.get("/badges", async (req, res) => {
   try {
     const badges = await Badge.find({ user: req.userId })
@@ -124,10 +117,8 @@ router.get("/badges", async (req, res) => {
   }
 });
 
-// Get user dashboard data
 router.get("/dashboard", async (req, res) => {
   try {
-    // Get user info
     const user = await User.findById(req.userId);
 
     if (!user) {
@@ -142,7 +133,6 @@ router.get("/dashboard", async (req, res) => {
       createdAt: user.createdAt
     };
 
-    // Get stats
     const statsResponse = await fetch(`${req.protocol}://${req.get('host')}/api/user/stats`, {
       headers: {
         'Authorization': req.headers.authorization,
@@ -162,10 +152,8 @@ router.get("/dashboard", async (req, res) => {
       statsData = statsResult.data;
     }
 
-    // Get badges
     const badges = await Badge.find({ user: req.userId });
 
-    // Get recent logs
     const recentLogs = await JournalEntry.find({ user: req.userId })
       .sort({ createdAt: -1 })
       .limit(5);
@@ -188,7 +176,6 @@ router.get("/dashboard", async (req, res) => {
   }
 });
 
-// Update profile (name, avatar)
 router.put("/profile", async (req, res) => {
   try {
     const { name, avatar } = req.body;

@@ -1,9 +1,8 @@
+// Client helpers for calling the MindLink API.
 import { mockAPI } from './mockApi';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
-const USE_MOCK_API = false; // Use real API
-
-// Types
+const USE_MOCK_API = false;
 export interface User {
   id: string;
   name: string;
@@ -77,7 +76,6 @@ export interface MoodLogRequest {
   note?: string;
 }
 
-// API utility functions
 class ApiClient {
   private baseURL: string;
 
@@ -140,13 +138,11 @@ class ApiClient {
 
 export const api = new ApiClient(API_BASE_URL);
 
-// Auth API functions
 export const authAPI = {
   register: async (data: RegisterRequest): Promise<ApiResponse<AuthResponse>> => {
     if (USE_MOCK_API) return mockAPI.register(data);
 
     const response = await api.post('/auth/register', data);
-    // Transform response to match expected format
     return {
       success: true,
       data: response.data
@@ -157,7 +153,6 @@ export const authAPI = {
     if (USE_MOCK_API) return mockAPI.login(data);
 
     const response = await api.post('/auth/login', data);
-    // Transform response to match expected format
     return {
       success: true,
       data: response.data
@@ -166,7 +161,6 @@ export const authAPI = {
 
   getMe: async (): Promise<ApiResponse<User>> => {
     const response = await api.get('/auth/me');
-    // Transform response to match expected format
     return {
       success: true,
       data: response.data
@@ -180,13 +174,11 @@ export const authAPI = {
     api.put(`/auth/resetpassword/${token}`, { password })
 };
 
-// Mood API functions (now using journals endpoint)
 export const moodAPI = {
   getLogs: async (page = 1, limit = 50): Promise<ApiResponse<MoodLog[] & { pagination: any }>> => {
     if (USE_MOCK_API) return mockAPI.getJournal();
 
     const response = await api.get(`/journals?page=${page}&limit=${limit}`);
-    // Transform response to match expected format
     return {
       success: true,
       data: response.data,
@@ -229,7 +221,6 @@ export const moodAPI = {
   }
 };
 
-// User API functions
 export const userAPI = {
   getStats: async (): Promise<ApiResponse<UserStats>> => {
     const response = await api.get('/user/stats');
@@ -266,7 +257,6 @@ export const userAPI = {
   }
 };
 
-// Journal API functions (now integrated with journals endpoint)
 export const journalAPI = {
   getEntries: async (page = 1, limit = 20): Promise<ApiResponse<MoodLog[] & { pagination: any }>> => {
     if (USE_MOCK_API) return mockAPI.getJournal();
