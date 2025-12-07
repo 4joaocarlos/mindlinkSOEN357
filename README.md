@@ -2,8 +2,8 @@
 # MindLink
 
 A mood tracking and journaling application with full-stack functionality.
-
-The original design is available at https://www.figma.com/design/uYSMpnsJlLZZV1NSHAdzBX/MindLink.
+Made for SOEN 357 for the Fall 2025 semester.
+Available at: https://mindlink-soen-357-3hvk63v5v-4joaocarlos-projects.vercel.app/
 
 ## Features
 
@@ -32,69 +32,6 @@ The original design is available at https://www.figma.com/design/uYSMpnsJlLZZV1N
 - **Security**: Helmet, CORS, rate limiting
 - **Features**: User auth, mood logging, streak tracking, badge system
 
-## Setup & Installation
-
-### Prerequisites
-- Node.js (v16 or higher)
-- MongoDB Atlas account (free tier available)
-- npm or yarn
-
-### MongoDB Atlas Setup
-
-1. **Create MongoDB Atlas Account**:
-   - Go to https://www.mongodb.com/atlas and create a free account
-   - Create a new cluster (M0 Sandbox is free)
-   - Create a database user with read/write permissions
-   - Whitelist your IP address (or 0.0.0.0/0 for development)
-   - Get your connection string from "Connect" → "Connect your application"
-
-### Backend Setup
-
-1. **Set up MongoDB Atlas**:
-   - Create account at https://www.mongodb.com/atlas
-   - Create cluster (M0 free tier works)
-   - Create database user and get connection string
-   - Whitelist your IP (or 0.0.0.0/0 for development)
-
-2. **Configure environment**:
-   ```bash
-   cd backend
-   # Copy the env template that was created
-   cp ../env-template.txt .env
-   ```
-   Edit `.env` and set:
-   - `MONGODB_URI`: Your Atlas connection string
-   - `JWT_SECRET`: Secure random string for JWT signing
-
-3. **Install and start**:
-   ```bash
-   npm install
-   npm run dev
-   ```
-   Backend runs on `http://localhost:3001`
-
-4. **Test the backend** (optional):
-   ```bash
-   npm run test
-   ```
-
-### Frontend Setup
-
-1. **Navigate to frontend directory**:
-   ```bash
-   cd SOEN357
-   ```
-
-2. **Install dependencies**:
-   ```bash
-   npm install
-   ```
-
-3. **Start the development server**:
-   ```bash
-   npm run dev
-   ```
-   Frontend will run on `http://localhost:5173`
 
 ## Usage
 
@@ -107,7 +44,7 @@ The original design is available at https://www.figma.com/design/uYSMpnsJlLZZV1N
 
 ## API Documentation
 
-See the backend README for complete API documentation.
+Deployed using Vercel and Render.
 
 ## Project Structure
 
@@ -131,15 +68,9 @@ See the backend README for complete API documentation.
 └── README.md          # This file
 ```
 
-## Contributing
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test both frontend and backend
-5. Submit a pull request
 
 ## License
-
+Used Figma for design and Icon packages
 MIT License
   
