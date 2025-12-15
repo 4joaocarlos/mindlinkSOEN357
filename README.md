@@ -1,9 +1,16 @@
 
 # MindLink
 
+**Group Members**
+- Bastidas, Juan (40228022)
+- Qasem, Laith (40200060)
+- Guarraci, Antonino (40264079)
+- Guidi, Benedetto (40228072)
+- Makarem, Wael (40164710)
+
 A mood tracking and journaling application with full-stack functionality.
 Made for SOEN 357 for the Fall 2025 semester.
-Available at: [https://mindlink-soen-357-3hvk63v5v-4joaocarlos-projects.vercel.app/](https://mindlink-soen-357.vercel.app/)
+Our fully functioning app can be accessed at: [https://mindlink-soen-357-3hvk63v5v-4joaocarlos-projects.vercel.app/](https://mindlink-soen-357.vercel.app/)
 
 ## Features
 
@@ -32,6 +39,34 @@ Available at: [https://mindlink-soen-357-3hvk63v5v-4joaocarlos-projects.vercel.a
 - **Security**: Helmet, CORS, rate limiting
 - **Features**: User auth, mood logging, streak tracking, badge system
 
+
+## Run Locally (frontend + backend)
+
+1. Install Node.js 18+ and npm (or yarn).
+2. Install frontend deps from the repo root:
+   ```bash
+   npm install
+   ```
+3. Install backend deps:
+   ```bash
+   cd backend
+   npm install
+   ```
+4. Create backend env file (fills in secrets/URLs):
+   ```bash
+   cp env-setup.txt .env
+   # edit .env with your MongoDB URI, JWT secret, FRONTEND_URL, etc.
+   ```
+5. Start the backend API (port 3001):
+   ```bash
+   npm run dev
+   ```
+6. In a second terminal, start the frontend (port 3002):
+   ```bash
+   cd <repo-root>
+   npm run dev
+   ```
+7. Open the app at http://localhost:3002 and ensure the backend is reachable at http://localhost:3001.
 
 ## Usage
 
