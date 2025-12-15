@@ -3,7 +3,7 @@
 
 A mood tracking and journaling application with full-stack functionality.
 Made for SOEN 357 for the Fall 2025 semester.
-Available at: https://mindlink-soen-357-3hvk63v5v-4joaocarlos-projects.vercel.app/
+Available at: [https://mindlink-soen-357-3hvk63v5v-4joaocarlos-projects.vercel.app/](https://mindlink-soen-357.vercel.app/)
 
 ## Features
 
